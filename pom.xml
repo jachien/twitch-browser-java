@@ -7,7 +7,7 @@
     <packaging>war</packaging>
     <version>1.0</version>
 
-    <groupId>com.google.appengine.demos</groupId>
+    <groupId>org.jchien.twitchbrowser</groupId>
     <artifactId>metal-scholar-763</artifactId>
 
     <pluginRepositories>
@@ -59,7 +59,6 @@
             <artifactId>google-http-client-appengine</artifactId>
             <version>1.19.0</version>
         </dependency>
-
 
         <!-- Test Dependencies -->
         <dependency>

@@ -66,7 +66,7 @@
 
         function writeGamesCookie(games) {
             var new_encoded_games = encodeGames(games);
-            document.cookie = "games=" + new_encoded_games + "; max-age=2147483647; path=/";
+            document.cookie = "settings=\"" + new_encoded_games + "\"; max-age=2147483647; path=/";
         }
 
         function addGame(game) {
@@ -100,12 +100,12 @@
         }
 
         function readEncodedGames() {
-            var nameEQ = "games=";
+            var nameEQ = "settings=\"";
             var ca = document.cookie.split(';');
             for(var i=0;i < ca.length;i++) {
                 var c = ca[i];
                 while (c.charAt(0)==' ') c = c.substring(1,c.length);
-                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length-1);
             }
 
             var hardcoded_games = ["Dota 2", "StarCraft II: Heart of the Swarm", "Dark Souls"];
@@ -117,9 +117,10 @@
             if (cookieValue.length == 0) {
                 return [];
             }
+            // todo replace +'s with spaces
             var games = cookieValue.split(':');
             return $.map(games, function(game) {
-                return decodeURIComponent(game);
+                return decodeURIComponent(game.replace(/\+/g, ' '));
             });
         }
 
@@ -128,7 +129,7 @@
                 return a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase());
             });
             var encoded_game_array = $.map(games, function(game) {
-                return encodeURIComponent(game);
+                return encodeURIComponent(game).replace(/%20/g, '+');
             });
             return encoded_game_array.join(":");
         }

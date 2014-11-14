@@ -1,11 +1,11 @@
 package org.jchien.twitchbrowser.settings;
 
-import com.google.api.client.util.Lists;
-import com.google.appengine.repackaged.com.google.common.base.Function;
-import com.google.appengine.repackaged.com.google.common.base.Joiner;
-import com.google.appengine.repackaged.com.google.common.base.Splitter;
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
-import com.google.appengine.repackaged.com.google.common.collect.Iterables;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,17 +15,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jchien
  */
 public class Settings {
     // stored as url_encoded_game_name1:url_encoded_game_name2:url_encoded_game_name3...
-    private static final String COOKIE_NAME = "SETTINGS";
+    private static final String COOKIE_NAME = "settings";
 
-    private static final int MAX_COOKIE_AGE = Integer.MAX_VALUE;
-
-    //private static final Settings EMPTY_COOKIE = new Settings(Lists.<String>newArrayListWithCapacity(0));
+    private static final int MAX_COOKIE_AGE = (int)TimeUnit.DAYS.toSeconds(10 * 365); // 10 years ought to be enough for anyone
 
     private static final List<String> DEFAULT_GAMES = ImmutableList.<String>builder()
             .add("Dota 2")
@@ -64,7 +63,6 @@ public class Settings {
                 }
             }
         }
-
         return EMPTY_COOKIE;
     }
 

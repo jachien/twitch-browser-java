@@ -2,11 +2,12 @@ package org.jchien.twitchbrowser.servlet;
 
 import com.google.api.client.util.Lists;
 import org.jchien.twitchbrowser.model.HomeModel;
-import org.jchien.twitchbrowser.prefs.SettingsCookie;
+import org.jchien.twitchbrowser.settings.Settings;
 import org.jchien.twitchbrowser.twitch.TwitchApiService;
 import org.jchien.twitchbrowser.twitch.TwitchStream;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,12 +24,15 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final SettingsCookie settings = SettingsCookie.getSettings(req);
+        final Settings settings = Settings.getSettings(req);
+
+        // refresh cookie duration
+        final Cookie cookie = settings.getCookie();
+        resp.addCookie(cookie);
+
         final List<String> gameNames = settings.getGameNames();
         final List<TwitchStream> streams = getStreams(gameNames);
-        for (TwitchStream tsm : streams) {
-            System.out.println(tsm);
-        }
+
         final HomeModel model = new HomeModel();
         model.setStreamList(streams);
         req.setAttribute("model", model);

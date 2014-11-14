@@ -21,14 +21,24 @@
     </style>
 </head>
 <body>
-<h1>Live Twitch.tv Streams</h1>
-<c:forEach var="stream" items="${model.streamList}">
-<div class="stream_item">
-    <div><a href="${fn:escapeXml(stream.channelUrl)}"><img src="${fn:escapeXml(stream.previewUrl)}" /></a></div>
-    <div>${fn:escapeXml(stream.status)}</div>
-    <div><strong>${fn:escapeXml(stream.displayName)}</strong> playing <strong>${fn:escapeXml(stream.gameName)}</strong></div>
-    <div>${fn:escapeXml(stream.numViewers)} viewers</div>
-</div>
-</c:forEach>
+    <h1>Live Twitch.tv Streams</h1>
+    <div><a href="/settings">Manage Games</a></div>
+    <div>
+        <c:choose>
+        <c:when test="${!empty model.streamList}">
+        <c:forEach var="stream" items="${model.streamList}">
+        <div class="stream_item">
+            <div><a href="${fn:escapeXml(stream.channelUrl)}"><img src="${fn:escapeXml(stream.previewUrl)}" /></a></div>
+            <div>${fn:escapeXml(stream.status)}</div>
+            <div><strong>${fn:escapeXml(stream.displayName)}</strong> playing <strong>${fn:escapeXml(stream.gameName)}</strong></div>
+            <div>${fn:escapeXml(stream.numViewers)} viewers</div>
+        </div>
+        </c:forEach>
+        </c:when>
+        <c:otherwise>
+            <div style="margin-top: 10px;">No streams found. <a href="/settings">Add some games</a> to get started!</div>
+        </c:otherwise>
+        </c:choose>
+    </div>
 </body>
 </html>

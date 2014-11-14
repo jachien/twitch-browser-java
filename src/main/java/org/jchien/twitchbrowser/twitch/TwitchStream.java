@@ -7,10 +7,10 @@ import org.jchien.twitchbrowser.util.JsonPath;
 /**
  * @author jchien
  */
-public class TwitchStreamMetadata {
-    private static Gson gson = new GsonBuilder()
+public class TwitchStream {
+    private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
-            .registerTypeAdapter(TwitchStreamMetadata.class, new AnnotatedPathDeserializer<>(TwitchStreamMetadata.class))
+            .registerTypeAdapter(TwitchStream.class, new AnnotatedPathDeserializer<>(TwitchStream.class))
             .create();
 
     @JsonPath(path={"viewers"})
@@ -22,6 +22,9 @@ public class TwitchStreamMetadata {
     @JsonPath(path={"channel", "display_name"})
     private String displayName;
 
+    @JsonPath(path={"channel", "game"})
+    private String gameName;
+
     @JsonPath(path={"channel", "name"})
     private String name;
 
@@ -31,12 +34,12 @@ public class TwitchStreamMetadata {
     @JsonPath(path={"preview", "medium"})
     private String previewUrl;
 
-    private TwitchStreamMetadata() {
+    private TwitchStream() {
         // use parseFrom(String jsonString) to create
     }
 
-    public static TwitchStreamMetadata parseFrom(String jsonString) {
-        return gson.fromJson(jsonString, TwitchStreamMetadata.class);
+    public static TwitchStream parseFrom(String jsonString) {
+        return GSON.fromJson(jsonString, TwitchStream.class);
     }
 
     public int getNumViewers() {
@@ -49,6 +52,10 @@ public class TwitchStreamMetadata {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getGameName() {
+        return gameName;
     }
 
     public String getName() {
@@ -65,10 +72,11 @@ public class TwitchStreamMetadata {
 
     @Override
     public String toString() {
-        return "TwitchStreamMetadata{" +
+        return "TwitchStream{" +
                 "numViewers=" + numViewers +
                 ", status='" + status + '\'' +
                 ", displayName='" + displayName + '\'' +
+                ", gameName='" + gameName + '\'' +
                 ", name='" + name + '\'' +
                 ", channelUrl='" + channelUrl + '\'' +
                 ", previewUrl='" + previewUrl + '\'' +
@@ -126,7 +134,7 @@ public class TwitchStreamMetadata {
                 "        }\n" +
                 "      }\n" +
                 "    }\n";
-        TwitchStreamMetadata tsm = TwitchStreamMetadata.parseFrom(json);
+        TwitchStream tsm = TwitchStream.parseFrom(json);
         System.out.println(tsm);
     }
 }

@@ -17,16 +17,16 @@ import java.util.List;
 public class TwitchApiService {
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
-    private static Gson gson = new GsonBuilder()
+    private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
-            .registerTypeAdapter(TwitchStreamMetadata.class, new AnnotatedPathDeserializer<>(TwitchStreamMetadata.class))
+            .registerTypeAdapter(TwitchStream.class, new AnnotatedPathDeserializer<>(TwitchStream.class))
             .create();
 
     private static final String HOST = "https://api.twitch.tv";
     private static final String STREAMS_ENDPOINT = "/kraken/search/streams";
 
-    private List<TwitchStreamMetadata> getStreams(String gameName, int limit) throws IOException {
-        final List<TwitchStreamMetadata> tsmList = Lists.newArrayList();
+    public List<TwitchStream> getStreams(String gameName, int limit) throws IOException {
+        final List<TwitchStream> tsmList = Lists.newArrayList();
         final HttpRequestFactory httpReqFactory = HTTP_TRANSPORT.createRequestFactory();
 
         final GenericUrl url = new GenericUrl(HOST + STREAMS_ENDPOINT)
@@ -53,7 +53,7 @@ public class TwitchApiService {
             final JsonObject root = json.getAsJsonObject();
             final JsonArray streams = root.getAsJsonArray("streams");
             for (JsonElement stream : streams) {
-                TwitchStreamMetadata tsm = TwitchStreamMetadata.parseFrom(gson.toJson(stream));
+                TwitchStream tsm = TwitchStream.parseFrom(GSON.toJson(stream));
                 tsmList.add(tsm);
             }
         } finally {
@@ -65,8 +65,8 @@ public class TwitchApiService {
 
     public static void main(String[] args) throws IOException {
         TwitchApiService s = new TwitchApiService();
-        List<TwitchStreamMetadata> tsmList = s.getStreams("Dota 2", 10);
-        for (TwitchStreamMetadata tsm : tsmList) {
+        List<TwitchStream> tsmList = s.getStreams("Dota 2", 10);
+        for (TwitchStream tsm : tsmList) {
             System.out.println(tsm);
         }
     }

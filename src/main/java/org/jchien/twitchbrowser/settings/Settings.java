@@ -1,4 +1,4 @@
-package org.jchien.twitchbrowser.prefs;
+package org.jchien.twitchbrowser.settings;
 
 import com.google.api.client.util.Lists;
 import com.google.appengine.repackaged.com.google.common.base.Function;
@@ -19,13 +19,13 @@ import java.util.List;
 /**
  * @author jchien
  */
-public class SettingsCookie {
+public class Settings {
     // stored as url_encoded_game_name1:url_encoded_game_name2:url_encoded_game_name3...
     private static final String COOKIE_NAME = "SETTINGS";
 
     private static final int MAX_COOKIE_AGE = Integer.MAX_VALUE;
 
-    //private static final SettingsCookie EMPTY_COOKIE = new SettingsCookie(Lists.<String>newArrayListWithCapacity(0));
+    //private static final Settings EMPTY_COOKIE = new Settings(Lists.<String>newArrayListWithCapacity(0));
 
     private static final List<String> DEFAULT_GAMES = ImmutableList.<String>builder()
             .add("Dota 2")
@@ -33,11 +33,11 @@ public class SettingsCookie {
             .add("Starcraft II: Heart of the Swarm")
             .build();
 
-    private static final SettingsCookie EMPTY_COOKIE = new SettingsCookie(DEFAULT_GAMES);
+    private static final Settings EMPTY_COOKIE = new Settings(DEFAULT_GAMES);
 
     private final List<String> gameNames;
 
-    private SettingsCookie(@Nonnull List<String> gameNames) {
+    private Settings(@Nonnull List<String> gameNames) {
         this.gameNames = gameNames;
     }
 
@@ -46,7 +46,7 @@ public class SettingsCookie {
     }
 
     @Nonnull
-    public static SettingsCookie getSettings(HttpServletRequest req) {
+    public static Settings getSettings(HttpServletRequest req) {
         final Cookie[] cookies = req.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -60,7 +60,7 @@ public class SettingsCookie {
                         }
                     });
                     final List<String> gameNames = Lists.newArrayList(decodedIterable);
-                    return new SettingsCookie(gameNames);
+                    return new Settings(gameNames);
                 }
             }
         }

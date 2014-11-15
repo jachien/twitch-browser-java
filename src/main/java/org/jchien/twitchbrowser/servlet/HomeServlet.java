@@ -1,11 +1,14 @@
 package org.jchien.twitchbrowser.servlet;
 
 import com.google.api.client.util.Lists;
+import org.jchien.twitchbrowser.listener.TwitchBrowserContext;
 import org.jchien.twitchbrowser.model.HomeModel;
 import org.jchien.twitchbrowser.settings.Settings;
 import org.jchien.twitchbrowser.twitch.TwitchApiService;
 import org.jchien.twitchbrowser.twitch.TwitchStream;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
@@ -20,7 +23,15 @@ import java.util.List;
  * @author jchien
  */
 public class HomeServlet extends HttpServlet {
-    private final TwitchApiService twitchApiService = new TwitchApiService();
+    private TwitchApiService twitchApiService;
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        final ServletContext ctx = config.getServletContext();
+        final TwitchBrowserContext tbCtx = (TwitchBrowserContext)ctx.getAttribute(TwitchBrowserContext.CTX);
+        twitchApiService = tbCtx.getTwitchApiService();
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

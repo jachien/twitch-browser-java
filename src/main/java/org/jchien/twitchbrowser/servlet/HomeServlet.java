@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -46,10 +47,17 @@ public class HomeServlet extends HttpServlet {
         resp.addCookie(cookie);
 
         final List<String> gameNames = settings.getGameNames();
+
+        final long startTime = System.currentTimeMillis();
         final List<TwitchStream> streams = getStreams(gameNames);
+        final long fetchTime = System.currentTimeMillis() - startTime;
+        final String formattedTimingString = getFormattedTimingString(fetchTime);
 
         final HomeModel model = new HomeModel();
         model.setStreamList(streams);
+        model.setNumGames(gameNames.size());
+        model.setFormattedTimingString(formattedTimingString);
+
         req.setAttribute("model", model);
 
         req.getRequestDispatcher("index.jsp").forward(req, resp);
@@ -67,5 +75,10 @@ public class HomeServlet extends HttpServlet {
             }
         });
         return streams;
+    }
+
+    private String getFormattedTimingString(long elapsed) {
+        final DecimalFormat df = new DecimalFormat("#.000");
+        return df.format(elapsed / 1000.0);
     }
 }

@@ -46,7 +46,7 @@ public class TwitchApiService {
         }
 
         final InputStream is = httpResp.getContent();
-        final InputStreamReader isr = new InputStreamReader(is);
+        final InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         try {
             final JsonParser jsonParser = new JsonParser();
             final JsonElement json = jsonParser.parse(isr);

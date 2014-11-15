@@ -9,6 +9,7 @@ import org.jchien.twitchbrowser.util.AnnotatedPathDeserializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -45,8 +46,9 @@ public class TwitchApiService {
             throw new IOException("unable to parse stream, error code " + httpResp.getStatusCode());
         }
 
+        final Charset contentCharset = httpResp.getContentCharset();
         final InputStream is = httpResp.getContent();
-        final InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+        final InputStreamReader isr = new InputStreamReader(is, contentCharset);
         try {
             final JsonParser jsonParser = new JsonParser();
             final JsonElement json = jsonParser.parse(isr);

@@ -14,25 +14,25 @@ public class TwitchStream {
             .create();
 
     @JsonPath(path={"viewers"})
-    private int numViewers;
+    private int numViewers = 0;
 
     @JsonPath(path={"channel", "status"})
-    private String status;
+    private String status = "";
 
     @JsonPath(path={"channel", "display_name"})
-    private String displayName;
+    private String displayName = "";
 
     @JsonPath(path={"channel", "game"})
-    private String gameName;
+    private String gameName = "";
 
     @JsonPath(path={"channel", "name"})
-    private String name;
+    private String name = "";
 
     @JsonPath(path={"channel", "url"})
-    private String channelUrl;
+    private String channelUrl = "";
 
     @JsonPath(path={"preview", "medium"})
-    private String previewUrl;
+    private String previewUrl = "";
 
     private TwitchStream() {
         // use parseFrom(String jsonString) to create

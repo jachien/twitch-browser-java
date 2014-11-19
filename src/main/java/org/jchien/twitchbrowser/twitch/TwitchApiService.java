@@ -55,8 +55,12 @@ public class TwitchApiService {
             final JsonObject root = json.getAsJsonObject();
             final JsonArray streams = root.getAsJsonArray("streams");
             for (JsonElement stream : streams) {
-                TwitchStream tsm = TwitchStream.parseFrom(GSON.toJson(stream));
-                tsmList.add(tsm);
+                try {
+                    TwitchStream tsm = TwitchStream.parseFrom(GSON.toJson(stream));
+                    tsmList.add(tsm);
+                } catch (Exception e) {
+                    throw new RuntimeException("failed to parse results for query " + gameName + ":\n" + root, e);
+                }
             }
         } finally {
             isr.close();

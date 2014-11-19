@@ -36,7 +36,7 @@ public class TwitchApiService {
 
         final HttpHeaders headers = new HttpHeaders()
                 .setAccept("application/vnd.twitchtv.v3+json")
-                .set("Client-ID", "Twitch Browser https://github.com/jachien/twitch-browser");
+                .set("Client-ID", "Twitch Browser https://github.com/jachien/twitch-browser-java");
 
         final HttpRequest httpReq = httpReqFactory.buildGetRequest(url)
                 .setHeaders(headers);

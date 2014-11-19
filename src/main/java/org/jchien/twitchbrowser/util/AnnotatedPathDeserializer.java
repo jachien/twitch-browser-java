@@ -53,8 +53,8 @@ public class AnnotatedPathDeserializer <E> implements JsonDeserializer<E> {
                     try {
                         parseValue(ret, field, jsonPath, root);
                     } catch (Exception e) {
-                        // blow up for now until logging is handled properly
-                        throw new RuntimeException("unable to parse path " + Joiner.on("/").join(jsonPath.path()), e);
+                        // swallow for now until logging is handled properly
+                        //throw new RuntimeException("unable to parse path " + Joiner.on("/").join(jsonPath.path()) + " from response:\n" + root, e);
                     }
 
                     // only one annotation of each type is allowed per field,

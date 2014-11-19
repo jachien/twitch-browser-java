@@ -24,14 +24,14 @@ public class TwitchApiService {
             .create();
 
     private static final String HOST = "https://api.twitch.tv";
-    private static final String STREAMS_ENDPOINT = "/kraken/search/streams";
+    private static final String STREAMS_ENDPOINT = "/kraken/streams";
 
     public List<TwitchStream> getStreams(String gameName, int limit) throws IOException {
         final List<TwitchStream> tsmList = Lists.newArrayList();
         final HttpRequestFactory httpReqFactory = HTTP_TRANSPORT.createRequestFactory();
 
         final GenericUrl url = new GenericUrl(HOST + STREAMS_ENDPOINT)
-                .set("q", gameName)
+                .set("game", gameName)
                 .set("limit", limit);
 
         final HttpHeaders headers = new HttpHeaders()

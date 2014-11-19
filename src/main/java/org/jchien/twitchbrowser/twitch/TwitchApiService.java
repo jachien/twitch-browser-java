@@ -48,8 +48,7 @@ public class TwitchApiService {
 
         final Charset contentCharset = httpResp.getContentCharset();
         final InputStream is = httpResp.getContent();
-        final InputStreamReader isr = new InputStreamReader(is, contentCharset);
-        try {
+        try (final InputStreamReader isr = new InputStreamReader(is, contentCharset)) {
             final JsonParser jsonParser = new JsonParser();
             final JsonElement json = jsonParser.parse(isr);
             final JsonObject root = json.getAsJsonObject();
@@ -62,8 +61,6 @@ public class TwitchApiService {
                     throw new RuntimeException("failed to parse results for query " + gameName + ":\n" + root, e);
                 }
             }
-        } finally {
-            isr.close();
         }
 
         return tsmList;

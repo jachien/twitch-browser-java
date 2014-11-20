@@ -47,7 +47,8 @@ public class HomeServlet extends HttpServlet {
                 LOG.debug("ignoring request to " + RequestUtils.getFullRequestUri(req));
             }
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            throw new NotFoundException();
+            req.getRequestDispatcher("jsp/errors/404.jsp").forward(req, resp);
+            return;
         }
 
         req.setCharacterEncoding("UTF-8");

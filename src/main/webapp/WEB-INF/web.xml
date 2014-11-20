@@ -32,10 +32,4 @@
         <servlet-name>settings</servlet-name>
         <url-pattern>/settings</url-pattern>
     </servlet-mapping>
-
-    <error-page>
-        <exception-type>org.jchien.twitchbrowser.util.NotFoundException</exception-type>
-        <location>/jsp/errors/404.jsp</location>
-    </error-page>
-
 </web-app>

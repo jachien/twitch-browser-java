@@ -7,6 +7,7 @@ import org.jchien.twitchbrowser.model.HomeModel;
 import org.jchien.twitchbrowser.settings.Settings;
 import org.jchien.twitchbrowser.twitch.TwitchApiService;
 import org.jchien.twitchbrowser.twitch.TwitchStream;
+import org.jchien.twitchbrowser.util.NotFoundException;
 import org.jchien.twitchbrowser.util.RequestUtils;
 
 import javax.servlet.ServletConfig;
@@ -46,7 +47,7 @@ public class HomeServlet extends HttpServlet {
                 LOG.debug("ignoring request to " + RequestUtils.getFullRequestUri(req));
             }
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return;
+            throw new NotFoundException();
         }
 
         req.setCharacterEncoding("UTF-8");
@@ -74,7 +75,7 @@ public class HomeServlet extends HttpServlet {
 
         req.setAttribute("model", model);
 
-        req.getRequestDispatcher("index.jsp").forward(req, resp);
+        req.getRequestDispatcher("jsp/index.jsp").forward(req, resp);
     }
 
     private List<TwitchStream> getStreams(List<String> gameNames) throws IOException {

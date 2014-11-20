@@ -4,6 +4,7 @@ import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.util.Lists;
 import com.google.gson.*;
+import org.apache.log4j.Logger;
 import org.jchien.twitchbrowser.util.AnnotatedPathDeserializer;
 
 import java.io.IOException;
@@ -16,6 +17,8 @@ import java.util.List;
  * @author jchien
  */
 public class TwitchApiService {
+    private static final Logger LOG = Logger.getLogger(TwitchApiService.class);
+
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
     private static final Gson GSON = new GsonBuilder()
@@ -41,7 +44,11 @@ public class TwitchApiService {
         final HttpRequest httpReq = httpReqFactory.buildGetRequest(url)
                 .setHeaders(headers);
 
+        final long start = System.currentTimeMillis();
         final HttpResponse httpResp = httpReq.execute();
+        final long elapsed = System.currentTimeMillis() - start;
+        LOG.info("took " + elapsed + " ms to make query for \"" + gameName + "\"");
+
         if (200 != httpResp.getStatusCode()) {
             throw new IOException("unable to parse stream, error code " + httpResp.getStatusCode());
         }
@@ -55,10 +62,10 @@ public class TwitchApiService {
             final JsonArray streams = root.getAsJsonArray("streams");
             for (JsonElement stream : streams) {
                 try {
-                    TwitchStream tsm = TwitchStream.parseFrom(GSON.toJson(stream));
+                    final TwitchStream tsm = TwitchStream.parseFrom(GSON.toJson(stream));
                     tsmList.add(tsm);
                 } catch (Exception e) {
-                    throw new RuntimeException("failed to parse results for query " + gameName + ":\n" + root, e);
+                    LOG.warn("failed to parse results for query " + gameName + ":\n" + root, e);
                 }
             }
         }

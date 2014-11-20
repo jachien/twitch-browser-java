@@ -1,11 +1,13 @@
 package org.jchien.twitchbrowser.servlet;
 
 import com.google.api.client.util.Lists;
+import org.apache.log4j.Logger;
 import org.jchien.twitchbrowser.listener.TwitchBrowserContext;
 import org.jchien.twitchbrowser.model.HomeModel;
 import org.jchien.twitchbrowser.settings.Settings;
 import org.jchien.twitchbrowser.twitch.TwitchApiService;
 import org.jchien.twitchbrowser.twitch.TwitchStream;
+import org.jchien.twitchbrowser.util.RequestUtils;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -24,6 +26,8 @@ import java.util.List;
  * @author jchien
  */
 public class HomeServlet extends HttpServlet {
+    private static final Logger LOG = Logger.getLogger(HomeServlet.class);
+
     private TwitchApiService twitchApiService;
 
     @Override
@@ -36,6 +40,15 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 404 anything that's not to root path, like requests for favicon.ico (this is the default servlet)
+        if (!"/".equals(req.getRequestURI())) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ignoring request to " + RequestUtils.getFullRequestUri(req));
+            }
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("text/html; charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
@@ -47,6 +60,7 @@ public class HomeServlet extends HttpServlet {
         resp.addCookie(cookie);
 
         final List<String> gameNames = settings.getGameNames();
+        LOG.info("servicing request for " + gameNames.size() + " games, requested by " + req.getRemoteAddr() + " to " + RequestUtils.getFullRequestUri(req));
 
         final long startTime = System.currentTimeMillis();
         final List<TwitchStream> streams = getStreams(gameNames);

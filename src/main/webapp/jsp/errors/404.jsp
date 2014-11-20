@@ -10,6 +10,6 @@
     </style>
 </head>
 <body>
-<h1>404 - Sorry, there's nothing here.</h1>
+<h1>404: Sorry, there's nothing here.</h1>
 </body>
 </html>

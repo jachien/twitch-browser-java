@@ -7,7 +7,6 @@ import org.jchien.twitchbrowser.model.HomeModel;
 import org.jchien.twitchbrowser.settings.Settings;
 import org.jchien.twitchbrowser.twitch.TwitchApiService;
 import org.jchien.twitchbrowser.twitch.TwitchStream;
-import org.jchien.twitchbrowser.util.NotFoundException;
 import org.jchien.twitchbrowser.util.RequestUtils;
 
 import javax.servlet.ServletConfig;

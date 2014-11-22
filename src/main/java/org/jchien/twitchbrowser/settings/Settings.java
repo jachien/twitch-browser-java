@@ -2,6 +2,7 @@ package org.jchien.twitchbrowser.settings;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -58,7 +59,13 @@ public class Settings {
                             return urlDecode(s);
                         }
                     });
-                    final List<String> gameNames = Lists.newArrayList(decodedIterable);
+                    final Iterable<String> filteredIterable = Iterables.filter(decodedIterable, new Predicate<String>() {
+                        @Override
+                        public boolean apply(@Nullable String s) {
+                            return s != null && s.length() > 0;
+                        }
+                    });
+                    final List<String> gameNames = Lists.newArrayList(filteredIterable);
                     return new Settings(gameNames);
                 }
             }

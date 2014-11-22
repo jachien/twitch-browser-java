@@ -30,7 +30,26 @@ public class TwitchApiService {
     private static final String STREAMS_ENDPOINT = "/kraken/streams";
 
     public List<TwitchStream> getStreams(String gameName, int limit) throws IOException {
-        final List<TwitchStream> tsmList = Lists.newArrayList();
+
+
+        final HttpRequest httpReq = buildRequest(gameName, limit);
+
+        final HttpResponse httpResp;
+
+        final long start = System.currentTimeMillis();
+        try {
+            httpResp = httpReq.execute();
+        } catch (Exception e) {
+            LOG.error("failed to make http request for \"" + gameName + "\" to " + httpReq.getUrl(), e);
+            return Lists.newArrayList();
+        }
+        final long elapsed = System.currentTimeMillis() - start;
+        LOG.info("took " + elapsed + " ms to make query for \"" + gameName + "\"");
+
+        return parseResponse(httpResp, gameName);
+    }
+
+    private HttpRequest buildRequest(String gameName, int limit) throws IOException {
         final HttpRequestFactory httpReqFactory = HTTP_TRANSPORT.createRequestFactory();
 
         final GenericUrl url = new GenericUrl(HOST + STREAMS_ENDPOINT)
@@ -44,15 +63,16 @@ public class TwitchApiService {
         final HttpRequest httpReq = httpReqFactory.buildGetRequest(url)
                 .setHeaders(headers);
 
-        final long start = System.currentTimeMillis();
-        final HttpResponse httpResp = httpReq.execute();
-        final long elapsed = System.currentTimeMillis() - start;
-        LOG.info("took " + elapsed + " ms to make query for \"" + gameName + "\"");
+        return httpReq;
+    }
 
+    private List<TwitchStream> parseResponse(HttpResponse httpResp, String gameName) throws IOException {
         if (200 != httpResp.getStatusCode()) {
-            throw new IOException("unable to parse stream, error code " + httpResp.getStatusCode());
+            LOG.error("unable to parse stream, error code " + httpResp.getStatusCode());
+            return Lists.newArrayList();
         }
 
+        final List<TwitchStream> tsmList = Lists.newArrayList();
         final Charset contentCharset = httpResp.getContentCharset();
         final InputStream is = httpResp.getContent();
         try (final InputStreamReader isr = new InputStreamReader(is, contentCharset)) {
@@ -71,13 +91,5 @@ public class TwitchApiService {
         }
 
         return tsmList;
-    }
-
-    public static void main(String[] args) throws IOException {
-        TwitchApiService s = new TwitchApiService();
-        List<TwitchStream> tsmList = s.getStreams("Dota 2", 10);
-        for (TwitchStream tsm : tsmList) {
-            System.out.println(tsm);
-        }
     }
 }

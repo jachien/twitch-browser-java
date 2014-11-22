@@ -3,21 +3,8 @@
     <title>Manage Games - Twitch Browser</title>
     <script src="/static/js/jquery-1.9.1.js"></script>
     <script src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
-    <link rel="stylesheet" href="/static/css/smoothness/jquery-ui-1.10.3.custom.min.css"/>
-
-    <style>
-        body {
-            font: 12px Helvetica,Arial,sans-serif;
-            background-color: #dddddd;
-        }
-        .ui-autocomplete-loading {
-            background: white url('/static/css/smoothness/images/ui-anim_basic_16x16.gif') right center no-repeat;
-        }
-        #game { width: 25em; }
-        #games td {
-            padding: 2px 16px 2px 16px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/static/css/smoothness/jquery-ui-1.10.3.custom.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/twitchbrowser.css"/>
 
     <!-- autocomplete js modified from http://jqueryui.com/autocomplete/#remote-jsonp -->
     <script>

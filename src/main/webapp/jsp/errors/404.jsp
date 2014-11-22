@@ -2,12 +2,7 @@
 <html>
 <head>
     <title>Twitch Browser</title>
-    <style>
-        body {
-            font: 12px Helvetica,Arial,sans-serif;
-            background-color: #dddddd;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/static/css/twitchbrowser.css"/>
 </head>
 <body>
 <h1>404: Sorry, there's nothing here.</h1>

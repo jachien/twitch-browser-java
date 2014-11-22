@@ -5,21 +5,7 @@
 <html>
 <head>
     <title>Twitch Browser</title>
-    <style>
-        body {
-            font: 12px Helvetica,Arial,sans-serif;
-            background-color: #dddddd;
-        }
-        .stream_item {
-            width: 320px;
-            display: inline-block;
-            margin: 10px;
-            vertical-align: top;
-        }
-        .stream_item div {
-            margin: 2px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/static/css/twitchbrowser.css"/>
 </head>
 <body>
     <h1>Live Twitch.tv Streams</h1>

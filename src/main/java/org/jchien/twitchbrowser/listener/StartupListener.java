@@ -1,7 +1,8 @@
 package org.jchien.twitchbrowser.listener;
 
 import org.apache.log4j.Logger;
-import org.jchien.twitchbrowser.twitch.TwitchApiService;
+import org.jchien.twitchbrowser.twitch.BasicTwitchApiService;
+import org.jchien.twitchbrowser.twitch.CachingTwitchApiService;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -15,7 +16,7 @@ public class StartupListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        final TwitchApiService twitchApiService = new TwitchApiService();
+        final CachingTwitchApiService twitchApiService = new CachingTwitchApiService(new BasicTwitchApiService());
         final TwitchBrowserContext tbCtx = new TwitchBrowserContext(twitchApiService);
         final ServletContext ctx = servletContextEvent.getServletContext();
         ctx.setAttribute(TwitchBrowserContext.CTX, tbCtx);

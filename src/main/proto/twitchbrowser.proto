@@ -1,0 +1,19 @@
+package org.jchien.twitchbrowser.twitch;
+
+option java_package = "org.jchien.twitchbrowser.twitch";
+option java_outer_classname = "TwitchBrowserProtos";
+
+message StreamEntry {
+    optional int32 numViewers = 1;
+    optional string channelStatus = 2;
+    optional string channelDisplayName = 3;
+    optional string gameName = 4;
+    optional string channelName = 5;
+    optional string channelUrl = 6;
+    optional string previewUrl = 7;
+}
+
+message CacheEntry {
+    repeated StreamEntry stream = 1;
+    optional int64 timestamp = 2;
+}

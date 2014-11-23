@@ -38,6 +38,16 @@ public class TwitchStream {
         // use parseFrom(String jsonString) to create
     }
 
+    TwitchStream(int numViewers, String status, String displayName, String gameName, String name, String channelUrl, String previewUrl) {
+        this.numViewers = numViewers;
+        this.status = status;
+        this.displayName = displayName;
+        this.gameName = gameName;
+        this.name = name;
+        this.channelUrl = channelUrl;
+        this.previewUrl = previewUrl;
+    }
+
     public static TwitchStream parseFrom(String jsonString) {
         return GSON.fromJson(jsonString, TwitchStream.class);
     }

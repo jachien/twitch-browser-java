@@ -46,7 +46,7 @@ public class HomeServlet extends HttpServlet {
                 LOG.debug("ignoring request to " + RequestUtils.getFullRequestUri(req));
             }
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            req.getRequestDispatcher("jsp/errors/404.jsp").forward(req, resp);
+            req.getRequestDispatcher("/jsp/errors/404.jsp").forward(req, resp);
             return;
         }
 
@@ -75,7 +75,7 @@ public class HomeServlet extends HttpServlet {
 
         req.setAttribute("model", model);
 
-        req.getRequestDispatcher("jsp/index.jsp").forward(req, resp);
+        req.getRequestDispatcher("/jsp/index.jsp").forward(req, resp);
     }
 
     private List<TwitchStream> getStreams(List<String> gameNames) {

@@ -78,18 +78,23 @@ public class HomeServlet extends HttpServlet {
         req.getRequestDispatcher("jsp/index.jsp").forward(req, resp);
     }
 
-    private List<TwitchStream> getStreams(List<String> gameNames) throws IOException {
-        final List<TwitchStream> streams = Lists.newArrayList();
+    private List<TwitchStream> getStreams(List<String> gameNames) {
+        final List<TwitchStream> combinedStreams = Lists.newArrayList();
         for (String gameName : gameNames) {
-            streams.addAll(twitchApiService.getStreams(gameName, 20));
+            try {
+                final List<TwitchStream> streams = twitchApiService.getStreams(gameName, 20);
+                combinedStreams.addAll(streams);
+            } catch (IOException e) {
+                LOG.warn("failed to get streams for \"" + gameName + "\"", e);
+            }
         }
-        Collections.sort(streams, new Comparator<TwitchStream>() {
+        Collections.sort(combinedStreams, new Comparator<TwitchStream>() {
             @Override
             public int compare(TwitchStream o1, TwitchStream o2) {
                 return o2.getNumViewers() - o1.getNumViewers();
             }
         });
-        return streams;
+        return combinedStreams;
     }
 
     private String getFormattedTimingString(long elapsed) {

@@ -2,9 +2,11 @@ package org.jchien.twitchbrowser.twitch;
 
 import com.google.api.client.util.Lists;
 import com.google.appengine.api.memcache.*;
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -40,30 +42,62 @@ public class CachingTwitchApiService implements TwitchApiService {
     public List<TwitchStream> getStreams(String gameName, int limit) throws IOException {
         // assume someone else is enforcing sane upper bounds on limit
 
-        final Future<Object> future = memcache.get(gameName);
-        try {
-            final long cacheStart = System.currentTimeMillis();
-            final Object cacheResult = future.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            final long cacheTime = System.currentTimeMillis() - cacheStart;
-            if (cacheResult != null) {
-                final byte[] bytes = (byte[]) cacheResult;
-                final TwitchBrowserProtos.CacheEntry entry = TwitchBrowserProtos.CacheEntry.parseFrom(bytes);
-                final long now = System.currentTimeMillis();
-                if (!isStale(now, entry.getTimestamp())) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("cache hit took " + cacheTime + " ms for \"" + gameName + "\", result is " + getAge(now, entry.getTimestamp()) + " ms old");
-                    }
-                    return demarshalStreams(entry, limit);
-                } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("stale cache hit took " + cacheTime + " ms for \"" + gameName + "\", result is " + getAge(now, entry.getTimestamp()) + " ms old");
-                    }
+        final CacheResult cacheResult = getCacheResult(gameName);
+        final long now = System.currentTimeMillis();
+        if (cacheResult.getCacheEntry() != null) {
+            final TwitchBrowserProtos.CacheEntry entry = cacheResult.getCacheEntry();
+            final long age = getAge(now, entry.getTimestamp());
+            if (!isStale(now, entry.getTimestamp())) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("cache hit took " + cacheResult.getTiming() + " ms for \"" + gameName + "\", result is " + age + " ms old");
                 }
+                return demarshalStreams(entry, limit);
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("cache miss took " + cacheTime + " ms for \"" + gameName + "\"");
+                    LOG.debug("stale cache hit took " + cacheResult.getTiming() + " ms for \"" + gameName + "\", result is " + age + " ms old");
                 }
             }
+        } else {
+            LOG.debug("cache miss took " + cacheResult.getTiming() + " ms for \"" + gameName + "\"");
+        }
+
+        // cache miss, stale entry, or timeout
+        try {
+            final List<TwitchStream> results = wrappedService.getStreams(gameName, GAME_STREAM_LIMIT);
+
+            // update cache
+            final TwitchBrowserProtos.CacheEntry cacheEntry = marshalStreams(results, GAME_STREAM_LIMIT, System.currentTimeMillis());
+            memcache.put(gameName, cacheEntry.toByteArray());
+
+            // we likely queried for more than the requested limit for caching purposes,
+            // if so only return the requested limit
+            if (results.size() > limit) {
+                final List<TwitchStream> truncated = Lists.newArrayListWithCapacity(limit);
+                for (int i=0; i < limit; i++) {
+                    truncated.add(results.get(i));
+                }
+                return truncated;
+            }
+
+            return results;
+        } catch (IOException e) {
+            if (cacheResult.getCacheEntry() != null) {
+                LOG.error("twitch api query failed, falling back on stale cache result", e);
+                return demarshalStreams(cacheResult.getCacheEntry(), limit);
+            } else {
+                // nothing to fall back on, rethrow exception
+                throw e;
+            }
+        }
+    }
+
+    @Nonnull
+    public CacheResult getCacheResult(String gameName) {
+        final Future<Object> future = memcache.get(gameName);
+        final long cacheStart = System.currentTimeMillis();
+        Object cacheResult = null;
+        try {
+            cacheResult = future.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             LOG.warn("interrupted querying memcache for \"" + gameName + "\"", e);
         } catch (ExecutionException e) {
@@ -72,25 +106,35 @@ public class CachingTwitchApiService implements TwitchApiService {
             // ain't nobody got time for that
             LOG.warn("timeout querying memcache for \"" + gameName + "\"", e);
         }
-
-        // cache miss, stale entry, or timeout
-        final List<TwitchStream> results = wrappedService.getStreams(gameName, GAME_STREAM_LIMIT);
-
-        // update cache
-        final TwitchBrowserProtos.CacheEntry cacheEntry = marshalStreams(results, GAME_STREAM_LIMIT, System.currentTimeMillis());
-        memcache.put(gameName, cacheEntry.toByteArray());
-
-        // we likely queried for more than the requested limit for caching purposes,
-        // if so only return the requested limit
-        if (results.size() > limit) {
-            final List<TwitchStream> truncated = Lists.newArrayListWithCapacity(limit);
-            for (int i=0; i < limit; i++) {
-                truncated.add(results.get(i));
+        final long lookupTime = System.currentTimeMillis() - cacheStart;
+        if (cacheResult != null) {
+            final byte[] bytes = (byte[]) cacheResult;
+            try {
+                final TwitchBrowserProtos.CacheEntry entry = TwitchBrowserProtos.CacheEntry.parseFrom(bytes);
+                return new CacheResult(entry, lookupTime);
+            } catch (InvalidProtocolBufferException e) {
+                LOG.warn("corrupted entry in memcache for \"" + gameName + "\"", e);
             }
-            return truncated;
+        }
+        return new CacheResult(null, lookupTime);
+    }
+
+    private class CacheResult {
+        private final TwitchBrowserProtos.CacheEntry cacheEntry;
+        private final long timing;
+
+        private CacheResult(TwitchBrowserProtos.CacheEntry cacheEntry, long timing) {
+            this.cacheEntry = cacheEntry;
+            this.timing = timing;
         }
 
-        return results;
+        private TwitchBrowserProtos.CacheEntry getCacheEntry() {
+            return cacheEntry;
+        }
+
+        private long getTiming() {
+            return timing;
+        }
     }
 
     private boolean isStale(long currentTimestamp, long cacheTimestamp) {

@@ -22,11 +22,19 @@ public class CachingTwitchApiService implements TwitchApiService {
 
     private static final String MEMCACHE_NAMESPACE = "twitchbrowser.v1";
 
+    // don't wait longer than this for memcached lookups
     private static final long TIMEOUT_MS = 200;
 
-    private static final long EXPIRATION_MS = TimeUnit.MINUTES.toMillis(1);
+    // do fresh query if cache result is this old
+    private static final long STALE_MS = TimeUnit.MINUTES.toMillis(2);
 
-    private static final int GAME_STREAM_LIMIT = 100;
+    // if query fails but cache result is at most this old, use stale cache result (it's still edible)
+    // stored as int because that's what memcache uses
+    private static final int EXPIRATION_MS = (int)TimeUnit.MINUTES.toMillis(5);
+
+    public static final int GAME_STREAM_LIMIT = 100;
+
+    private static final CacheResult EMPTY_CACHE_RESULT = new CacheResult(null, 0L);
 
     private final AsyncMemcacheService memcache;
 
@@ -39,10 +47,16 @@ public class CachingTwitchApiService implements TwitchApiService {
     }
 
     @Override
-    public List<TwitchStream> getStreams(String gameName, int limit) throws IOException {
+    public List<TwitchStream> getStreams(String gameName, int limit, boolean forceFresh) throws IOException {
         // assume someone else is enforcing sane upper bounds on limit
 
-        final CacheResult cacheResult = getCacheResult(gameName);
+        final CacheResult cacheResult;
+        if (!forceFresh) {
+            cacheResult = getCacheResult(gameName);
+        } else {
+            cacheResult = EMPTY_CACHE_RESULT;
+        }
+
         final long now = System.currentTimeMillis();
         if (cacheResult.getCacheEntry() != null) {
             final TwitchBrowserProtos.CacheEntry entry = cacheResult.getCacheEntry();
@@ -57,17 +71,21 @@ public class CachingTwitchApiService implements TwitchApiService {
                     LOG.debug("stale cache hit took " + cacheResult.getTiming() + " ms for \"" + gameName + "\", result is " + age + " ms old");
                 }
             }
-        } else {
+        } else if (!forceFresh) {
             LOG.debug("cache miss took " + cacheResult.getTiming() + " ms for \"" + gameName + "\"");
+        } else {
+            // intentionally empty body, we didn't do a cache lookup so don't log anything
         }
 
-        // cache miss, stale entry, or timeout
+        // cache miss, stale entry, timeout, or forced fresh request
         try {
-            final List<TwitchStream> results = wrappedService.getStreams(gameName, GAME_STREAM_LIMIT);
+            final List<TwitchStream> results = wrappedService.getStreams(gameName, GAME_STREAM_LIMIT, true);
 
             // update cache
             final TwitchBrowserProtos.CacheEntry cacheEntry = marshalStreams(results, GAME_STREAM_LIMIT, System.currentTimeMillis());
-            memcache.put(gameName, cacheEntry.toByteArray());
+            // don't care about race conditions, this isn't particularly time sensitive
+            // assuming results are going to be within a second or two within another
+            memcache.put(gameName, cacheEntry.toByteArray(), Expiration.byDeltaMillis(EXPIRATION_MS), MemcacheService.SetPolicy.SET_ALWAYS);
 
             // we likely queried for more than the requested limit for caching purposes,
             // if so only return the requested limit
@@ -82,13 +100,20 @@ public class CachingTwitchApiService implements TwitchApiService {
             return results;
         } catch (IOException e) {
             if (cacheResult.getCacheEntry() != null) {
-                LOG.error("twitch api query failed, falling back on stale cache result", e);
+                final long cacheResultAge = getAge(now, cacheResult.getCacheEntry().getTimestamp());
+                LOG.error("twitch api query failed, falling back on stale cache result, aged " + cacheResultAge + " ms", e);
                 return demarshalStreams(cacheResult.getCacheEntry(), limit);
             } else {
                 // nothing to fall back on, rethrow exception
                 throw e;
             }
         }
+    }
+
+    @Override
+    public List<TwitchGame> getPopularGames(int limit) throws IOException {
+        // don't want to cache this at this time
+        return wrappedService.getPopularGames(limit);
     }
 
     @Nonnull
@@ -119,7 +144,7 @@ public class CachingTwitchApiService implements TwitchApiService {
         return new CacheResult(null, lookupTime);
     }
 
-    private class CacheResult {
+    private static class CacheResult {
         private final TwitchBrowserProtos.CacheEntry cacheEntry;
         private final long timing;
 
@@ -138,7 +163,7 @@ public class CachingTwitchApiService implements TwitchApiService {
     }
 
     private boolean isStale(long currentTimestamp, long cacheTimestamp) {
-        return currentTimestamp - cacheTimestamp > EXPIRATION_MS;
+        return currentTimestamp - cacheTimestamp > STALE_MS;
     }
 
     private long getAge(long currentTimestamp, long cacheTimestamp) {

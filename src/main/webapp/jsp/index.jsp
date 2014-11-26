@@ -23,7 +23,7 @@
         </div>
         </c:forEach>
     </div>
-    <div>Took ${model.formattedTimingString} seconds to query ${model.numGames} games.</div>
+    <div>Took ${model.formattedTimingString} seconds to get streams for ${model.numGames} games.</div>
     </c:when>
     <c:otherwise>
     <div style="margin-top: 10px;">No streams found. <a href="/settings">Add some games</a> to get started!</div>

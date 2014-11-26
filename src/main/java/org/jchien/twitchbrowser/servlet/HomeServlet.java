@@ -33,9 +33,7 @@ public class HomeServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        final ServletContext ctx = config.getServletContext();
-        final TwitchBrowserContext tbCtx = (TwitchBrowserContext)ctx.getAttribute(TwitchBrowserContext.CTX);
-        twitchApiService = tbCtx.getTwitchApiService();
+        twitchApiService = TwitchBrowserContext.get(config).getTwitchApiService();
     }
 
     @Override
@@ -82,7 +80,7 @@ public class HomeServlet extends HttpServlet {
         final List<TwitchStream> combinedStreams = Lists.newArrayList();
         for (String gameName : gameNames) {
             try {
-                final List<TwitchStream> streams = twitchApiService.getStreams(gameName, 20);
+                final List<TwitchStream> streams = twitchApiService.getStreams(gameName, 20, false);
                 combinedStreams.addAll(streams);
             } catch (IOException e) {
                 LOG.warn("failed to get streams for \"" + gameName + "\"", e);

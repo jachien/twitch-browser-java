@@ -1,0 +1,8 @@
+<queue-entries>
+    <queue>
+        <name>cache-primer</name>
+        <rate>10/s</rate>
+        <bucket-size>100</bucket-size>
+        <max-concurrent-requests>2</max-concurrent-requests>
+    </queue>
+</queue-entries>

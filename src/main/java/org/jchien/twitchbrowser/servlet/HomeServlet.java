@@ -80,7 +80,7 @@ public class HomeServlet extends HttpServlet {
         final List<TwitchStream> combinedStreams = Lists.newArrayList();
         for (String gameName : gameNames) {
             try {
-                final List<TwitchStream> streams = twitchApiService.getStreams(gameName, 20, false);
+                final List<TwitchStream> streams = twitchApiService.getStreams(gameName, 25, false);
                 combinedStreams.addAll(streams);
             } catch (IOException e) {
                 LOG.warn("failed to get streams for \"" + gameName + "\"", e);

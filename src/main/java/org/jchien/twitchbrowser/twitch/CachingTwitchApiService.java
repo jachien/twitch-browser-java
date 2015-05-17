@@ -32,7 +32,7 @@ public class CachingTwitchApiService implements TwitchApiService {
     // stored as int because that's what memcache uses
     private static final int EXPIRATION_MS = (int)TimeUnit.MINUTES.toMillis(5);
 
-    public static final int GAME_STREAM_LIMIT = 100;
+    public static final int GAME_STREAM_LIMIT = 25;
 
     private static final CacheResult EMPTY_CACHE_RESULT = new CacheResult(null, 0L);
 

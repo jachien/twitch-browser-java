@@ -22,7 +22,7 @@ public class TwitchStream {
     @JsonPath(path={"channel", "display_name"})
     private String displayName = "";
 
-    @JsonPath(path={"channel", "game"})
+    @JsonPath(path={"game"})
     private String gameName = "";
 
     @JsonPath(path={"channel", "name"})
@@ -52,6 +52,14 @@ public class TwitchStream {
         return GSON.fromJson(jsonString, TwitchStream.class);
     }
 
+    private String getBackupChannelUrl() {
+        // the twitch api frequently has a bug where a stream will be missing channel/status, channel/game, and channel/url
+        // status is okay to be blank
+        // channel/game is redundant from another game field which never appears to be missing
+        // we'll construct the channel url from the name
+        return "http://www.twitch.tv/" + name;
+    }
+
     public int getNumViewers() {
         return numViewers;
     }
@@ -73,7 +81,10 @@ public class TwitchStream {
     }
 
     public String getChannelUrl() {
-        return channelUrl;
+        if (channelUrl != null && channelUrl.length() > 0) {
+            return channelUrl;
+        }
+        return getBackupChannelUrl();
     }
 
     public String getPreviewUrl() {
@@ -88,7 +99,7 @@ public class TwitchStream {
                 ", displayName='" + displayName + '\'' +
                 ", gameName='" + gameName + '\'' +
                 ", name='" + name + '\'' +
-                ", channelUrl='" + channelUrl + '\'' +
+                ", channelUrl='" + getChannelUrl() + '\'' +
                 ", previewUrl='" + previewUrl + '\'' +
                 '}';
     }
@@ -145,6 +156,39 @@ public class TwitchStream {
                 "      }\n" +
                 "    }\n";
         TwitchStream tsm = TwitchStream.parseFrom(json);
+        System.out.println(tsm);
+
+        json = "    {\n" +
+                "      \"_id\": 14431101712,\n" +
+                "      \"game\": \"Hearthstone: Heroes of Warcraft\",\n" +
+                "      \"viewers\": 157,\n" +
+                "      \"created_at\": \"2015-05-15T20:00:10Z\",\n" +
+                "      \"video_height\": 540,\n" +
+                "      \"average_fps\": 29.9618320611,\n" +
+                "      \"_links\": {\n" +
+                "        \"self\": \"https:\\/\\/api.twitch.tv\\/kraken\\/streams\\/polipotame\"\n" +
+                "      },\n" +
+                "      \"preview\": {\n" +
+                "        \"small\": \"http:\\/\\/static-cdn.jtvnw.net\\/previews-ttv\\/live_user_polipotame-80x45.jpg\",\n" +
+                "        \"medium\": \"http:\\/\\/static-cdn.jtvnw.net\\/previews-ttv\\/live_user_polipotame-320x180.jpg\",\n" +
+                "        \"large\": \"http:\\/\\/static-cdn.jtvnw.net\\/previews-ttv\\/live_user_polipotame-640x360.jpg\",\n" +
+                "        \"template\": \"http:\\/\\/static-cdn.jtvnw.net\\/previews-ttv\\/live_user_polipotame-{width}x{height}.jpg\"\n" +
+                "      },\n" +
+                "      \"channel\": {\n" +
+                "        \"_id\": 74535022,\n" +
+                "        \"name\": \"polipotame\",\n" +
+                "        \"created_at\": \"2014-11-05T15:30:38Z\",\n" +
+                "        \"updated_at\": \"2015-05-15T21:15:58Z\",\n" +
+                "        \"_links\": {\n" +
+                "          \"self\": \"https:\\/\\/api.twitch.tv\\/kraken\\/users\\/polipotame\"\n" +
+                "        },\n" +
+                "        \"display_name\": \"Polipotame\",\n" +
+                "        \"logo\": \"http:\\/\\/static-cdn.jtvnw.net\\/jtv_user_pictures\\/polipotame-profile_image-46e1a1b341f4e5de-300x300.jpeg\",\n" +
+                "        \"bio\": \"nothing\",\n" +
+                "        \"type\": \"user\"\n" +
+                "      }\n" +
+                "    }";
+        tsm = TwitchStream.parseFrom(json);
         System.out.println(tsm);
     }
 }

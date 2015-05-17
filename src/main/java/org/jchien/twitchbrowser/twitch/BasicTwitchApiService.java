@@ -7,9 +7,9 @@ import com.google.gson.*;
 import org.apache.log4j.Logger;
 import org.jchien.twitchbrowser.util.AnnotatedPathDeserializer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -58,12 +58,29 @@ public class BasicTwitchApiService implements TwitchApiService {
 
         final Charset contentCharset = httpResp.getContentCharset();
         final InputStream is = httpResp.getContent();
-        try (final InputStreamReader isr = new InputStreamReader(is, contentCharset)) {
-            final JsonParser jsonParser = new JsonParser();
-            final JsonElement json = jsonParser.parse(isr);
-            final JsonObject root = json.getAsJsonObject();
-            return responseHandler.handle(root);
-        }
+
+        final String content = readString(is, contentCharset);
+
+        final JsonParser jsonParser = new JsonParser();
+        final JsonElement json = jsonParser.parse(content);
+        final JsonObject root = json.getAsJsonObject();
+        return responseHandler.handle(root, content);
+    }
+
+    private String readString(InputStream is, Charset contentCharset) throws IOException {
+        final int bufSize = 1024;
+        final byte[] buf = new byte[bufSize];
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
+
+        int bytesRead;
+        do {
+            bytesRead = is.read(buf, 0, bufSize);
+            if (bytesRead > 0) {
+                baos.write(buf, 0, bytesRead);
+            }
+        } while (bytesRead > 0);
+
+        return new String(baos.toByteArray(), contentCharset);
     }
 
     @Override
@@ -116,7 +133,7 @@ public class BasicTwitchApiService implements TwitchApiService {
     }
 
     private interface JsonResponseHandler<T> {
-        T handle(JsonObject root);
+        T handle(JsonObject root, String rawJson);
     }
 
     private static class StreamsHandler implements JsonResponseHandler<List<TwitchStream>> {
@@ -127,13 +144,16 @@ public class BasicTwitchApiService implements TwitchApiService {
         }
 
         @Override
-        public List<TwitchStream> handle(JsonObject root) {
+        public List<TwitchStream> handle(JsonObject root, String rawJson) {
             final List<TwitchStream> tsmList = Lists.newArrayList();
             final JsonArray streams = root.getAsJsonArray("streams");
             for (JsonElement stream : streams) {
                 try {
                     final TwitchStream tsm = TwitchStream.parseFrom(GSON.toJson(stream));
                     tsmList.add(tsm);
+                    if (!TwitchResponseValidator.isValid(tsm)) {
+                        LOG.warn("Bad stream " + tsm + "\n from \n" + rawJson);
+                    }
                 } catch (Exception e) {
                     LOG.error("failed to parse results for query " + gameName + ":\n" + root, e);
                 }
@@ -144,7 +164,7 @@ public class BasicTwitchApiService implements TwitchApiService {
 
     private static class GamesHandler implements JsonResponseHandler<List<TwitchGame>> {
         @Override
-        public List<TwitchGame> handle(JsonObject root) {
+        public List<TwitchGame> handle(JsonObject root, String rawJson) {
             final List<TwitchGame> tgList = Lists.newArrayList();
             final JsonArray topGames = root.getAsJsonArray("top");
             for (JsonElement gameJson : topGames) {

@@ -12,6 +12,56 @@ body {
 
 .stream_item div {
     margin: 2px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.game_item {
+    width: 136px;
+    display: inline-block;
+    margin: 4px 20px 4px 4px;
+    vertical-align: top;
+}
+
+.game_item_name {
+    margin: 2px 0px 2px 0px;
+}
+
+.game_item_boxart {
+    position: relative;
+}
+
+.game_item_remove {
+    position: absolute;
+    top: 30px;
+    width: 128px;
+    background-color: #0f0f0f;
+    color: #ffffff;
+    text-align: center;
+    padding: 8px 4px;
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+.game_item_remove a:link {
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.game_item_remove a:visited {
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.game_item_remove a:active {
+    text-decoration: none;
+    color: #ff0000;
+}
+
+.game_item_remove a:hover {
+    text-decoration: none;
+    color: #ff0000;
 }
 
 .ui-autocomplete-loading {

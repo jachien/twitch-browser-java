@@ -104,7 +104,6 @@
             if (cookieValue.length == 0) {
                 return [];
             }
-            // todo replace +'s with spaces
             var games = cookieValue.split(':');
             return $.map(games, function(game) {
                 return decodeURIComponent(game.replace(/\+/g, ' '));
@@ -116,24 +115,33 @@
                 return a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase());
             });
             var encoded_game_array = $.map(games, function(game) {
-                return encodeURIComponent(game).replace(/%20/g, '+');
+                return urlEncode(game);
             });
             return encoded_game_array.join(":");
+        }
+
+        function urlEncode(str) {
+            return encodeURIComponent(str).replace(/%20/g, '+');
         }
 
         function renderGames() {
             var encoded_games = readEncodedGames();
             var games = decodeGames(encoded_games);
-            $("#games").empty().append("<table>");
+
+            $("#games").empty()
             if (games.length > 0) {
                 for (var i=0; i < games.length; i++) {
-                    $("#games").append('<tr><td>' + games[i] + '</td><td><a href="#" onclick="removeGame(\'' + games[i] + '\'); renderGames();">remove</a></td></tr>');
+                    $("#games").append('<div class="game_item">' +
+                            '<div class="game_item_boxart">' +
+                            '<div class="game_item_remove"><a href="#" onclick="removeGame(\'' + games[i] + '\'); renderGames();">X Remove</a></div>' +
+                            '<div><img src="http://static-cdn.jtvnw.net/ttv-boxart/' + urlEncode(games[i]) + '-136x190.jpg"></div>' +
+                            '</div>' +
+                            '<div class="game_item_name"><strong>' + games[i] + '</strong></div>' +
+                            '</div>');
                 }
             } else {
-                $("#games").append("<tr><td>You don't have any games saved. Add some using the input box at the top!</td></tr>");
+                $("#games").append("<p>You don't have any games saved. Add some using the input box at the top!</p>");
             }
-
-            $("#games").append("</table>");
         }
     </script>
 </head>

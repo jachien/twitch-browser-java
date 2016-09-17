@@ -1,0 +1,12 @@
+improvement: update manage games ui
+bug: when managing games, if you type the full game name and press enter, it does nothing.
+    It should either 
+    a) indicate that there's no matching game
+    OR 
+    b) find a matching game from the autocomplete list and save it
+bug: if no streams found, displays text thinking you have no games added
+improvement: better first visit experience with selecting games to follow
+improvement: add inline showing or hiding of streams by game
+improvement: make front page prettier
+improvement: google account integration
+improvement: stream favoriting / ignoring

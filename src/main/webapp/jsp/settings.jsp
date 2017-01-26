@@ -97,7 +97,7 @@
                 if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length-1);
             }
 
-            var hardcoded_games = ["Dota 2", "StarCraft II: Heart of the Swarm", "Dark Souls"];
+            var hardcoded_games = ["Dota 2", "Hearthstone", "Overwatch"];
             writeGamesCookie(hardcoded_games);
             return encodeGames(hardcoded_games);
         }

@@ -40,7 +40,7 @@ public class BasicTwitchApiService implements TwitchApiService {
         final HttpRequestFactory httpReqFactory = HTTP_TRANSPORT.createRequestFactory();
 
         final HttpHeaders headers = new HttpHeaders()
-                .setAccept("application/vnd.twitchtv.v3+json")
+                .setAccept("application/vnd.twitchtv.v5+json")
                 .set("Client-ID", "ib5vu55l2rc4elcwyrqikyza4hio0y");
 
         final HttpRequest httpReq = httpReqFactory.buildGetRequest(url)

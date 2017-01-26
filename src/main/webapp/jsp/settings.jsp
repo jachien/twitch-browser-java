@@ -19,9 +19,11 @@
                         url: "https://api.twitch.tv/kraken/search/games",
                         dataType: "jsonp",
                         data: {
-                            q: request.term,
-                            type: "suggest"
+                            query: request.term,
+                            client_id: "ib5vu55l2rc4elcwyrqikyza4hio0y",
+                            api_version: "5"
                         },
+                        crossDomain: true,
                         success: function( data ) {
                             var games = data.games;
                             games.sort(function(a, b) {

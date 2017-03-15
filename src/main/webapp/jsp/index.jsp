@@ -4,6 +4,7 @@
 <jsp:useBean id="model" scope="request" type="org.jchien.twitchbrowser.model.HomeModel"/>
 <html>
 <head>
+    <meta charset="UTF-8"/>
     <title>Twitch Browser</title>
     <link rel="stylesheet" type="text/css" href="/static/css/twitchbrowser.css"/>
 </head>

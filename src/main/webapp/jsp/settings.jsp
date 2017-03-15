@@ -1,5 +1,6 @@
 <html>
 <head>
+    <meta charset="UTF-8"/>
     <title>Manage Games - Twitch Browser</title>
     <script src="/static/js/jquery-1.9.1.js"></script>
     <script src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>

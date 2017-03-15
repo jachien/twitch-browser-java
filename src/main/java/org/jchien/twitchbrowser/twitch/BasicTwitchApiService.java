@@ -41,6 +41,7 @@ public class BasicTwitchApiService implements TwitchApiService {
 
         final HttpHeaders headers = new HttpHeaders()
                 .setAccept("application/vnd.twitchtv.v5+json")
+                .setAcceptEncoding("UTF-8")
                 .set("Client-ID", "ib5vu55l2rc4elcwyrqikyza4hio0y");
 
         final HttpRequest httpReq = httpReqFactory.buildGetRequest(url)
@@ -56,7 +57,8 @@ public class BasicTwitchApiService implements TwitchApiService {
             throw new IOException("unable to parse stream, error code " + httpResp.getStatusCode());
         }
 
-        final Charset contentCharset = httpResp.getContentCharset();
+        // http response is claiming ISO-8859-1 charset, but it should be UTF-8 since the content type is application/json
+        final Charset contentCharset = Charset.forName("UTF-8");
         final InputStream is = httpResp.getContent();
 
         final String content = readString(is, contentCharset);

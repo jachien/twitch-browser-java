@@ -3,6 +3,6 @@
     <cron>
         <url>/cron/cacheprimer</url>
         <description>Repopulate the cache every minute</description>
-        <schedule>every 1 minutes</schedule>
+        <schedule>every 5 minutes</schedule>
     </cron>
 </cronentries>
